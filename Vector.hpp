@@ -25,11 +25,11 @@ namespace ft {
 			typedef std::reverse_iterator<iterator> reverse_iterator;
 			typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 		private:
-			T*				_arr;
-			size_type		_size;
-			size_type		_capacity;
-			allocator_type	_allocator;
-			static const size_type _expansion_factor = 2;
+			pointer					_arr;
+			size_type				_size;
+			size_type				_capacity;
+			allocator_type			_allocator;
+			static const size_type	_expansion_factor = 2;
 		public:
 			// Contructors
 			explicit vector (const allocator_type& alloc = allocator_type())
@@ -43,14 +43,26 @@ namespace ft {
         	vector (InputIterator first, InputIterator last,
                 	const allocator_type& alloc = allocator_type());
 
-			~vector();
+			~vector() {
+				clear();
+				_allocator.deallocate(_array, _capacity);
+				_capacity = 0;
+				_arr = NULL;
+			}
+
+
 			vector(const vector &ref) {
 
 			}
 			vector& operator= (const vector& x) {
-				if (this != &X)
+				if (this != &x)
 				{
-
+					clear();
+					if (x._size > _capacity)
+						reserve(_capacity);
+					for (size_t i = 0; i < x._size; i++)
+						_allocator.create(&_arr[i], x[i]);
+					_size = x._size;
 				}
 				return *this;
 			};
@@ -64,41 +76,48 @@ namespace ft {
 
 			size_type max_size() const { return _allocator.max_size; };
 
+			void resize (size_type n, value_type val = value_type()) {
+				if (n < _size)
+				{
+					for (size_t i = n; i < _size; i++)
+						_allocator.destroy(&_arr[i]);
+				}
+				else if (n > _size)
+				{
+					if (n > _capacity)
+						reserve(n);
+					for (size_t i = _size; i < n, i++)
+						_allocator.construct(&_arr[i], val);
+				}
+				_size = n;
+			}
+
 			size_type capacity() const { return _capacity; };
 
 			bool empty() const { return _size == 0; };
 
 			void reserve (size_type n) {
-				T* temp;
+				pointer* temp;
 
 				if (n > _capacity)
 				{
 					try
 					{
-						_capacity = n * _expansion_factor;
-						temp = _allocator.allocate(_capacity, _arr);
+						temp = _allocator.allocate(n, _arr);
 						for (int i = 0; i < _size; i++)
-							temp[i] = _arr[i];
+						{
+							_allocator.construct(&temp[i], _arr[i]);
+							_allocator.destroy(&arr[i]);
+						}
 						_allocator.deallocate(_arr, _capacity);
 						_arr = temp;
+						_capacity = n;
 					}
 					catch(const std::bad_alloc& ba)
 					{
 						throw;
 					}
 				}
-			}
-
-			void resize (size_type n, value_type val = value_type()) {
-				T* temp;
-
-				if (n < _size)
-				{
-					temp = _allocator.allocate(n, _arr);
-					
-
-				}
-				else if (n > size)
 			}
 
 			// Element access:
@@ -134,6 +153,41 @@ namespace ft {
 			void assign (size_type n, const value_type& val) {
 				for (int i = 0; i < n; i++)
 					_arr[i] = val;
+			}
+
+			void push_back (const value_type& val) {
+				++_size;
+				if (_size >= _capacity)
+					reserve(_capacity * _expansion_factor);
+				_allocator.construct(&_arr[_size], val);
+			}
+
+			void pop_back() {
+				_allocator.destroy(&_arr[_size - 1]);
+				--_size;
+			}
+
+			// iterator insert (iterator position, const value_type& val) {
+			// 	++_size;
+			// 	if (_size >= _capacity)
+			// 		reserve(_capacity * _expansion_factor);
+			// 	for (size_t i = (position - ))
+			// }
+
+			// void insert (iterator position, size_type n, const value_type& val) {
+
+			// }
+
+			// template <class InputIterator>
+			// void insert (iterator position, InputIterator first, InputIterator last) {
+
+			// }
+
+			void clear()
+			{
+				for (size_t i = 0; i < _size; i++)
+					_allocator.destroy(&_array[i]);
+				_size = 0;
 			}
 
 			// Allocator
