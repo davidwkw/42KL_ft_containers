@@ -4,7 +4,8 @@
 
 # include <memory>
 # include <stdexcept>
-# include <iterator>
+# include <iostream>
+# include "Iterator.hpp"
 
 namespace ft {
 
@@ -18,58 +19,78 @@ namespace ft {
 			typedef std::ptrdiff_t difference_type;
 			typedef	value_type&	reference;
 			typedef const value_type& const_reference;
-			typedef typename Alloc::pointer pointer;
-			typedef typename Alloc::const_pointer const_pointer;
-			typedef typename std::iterator<std::random_access_iterator_tag, T> iterator;
-			typedef typename std::iterator<std::random_access_iterator_tag, T> const_iterator;
+			typedef Alloc::pointer pointer;
+			typedef Alloc::const_pointer const_pointer;
+			typedef ft::Iterator<T> iterator;
+			typedef ft::Iterator<const T> const_iterator;
 			typedef std::reverse_iterator<iterator> reverse_iterator;
 			typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 		private:
+			static const size_type	_expansion_factor = 2;
 			pointer					_arr;
 			size_type				_size;
 			size_type				_capacity;
 			allocator_type			_allocator;
-			static const size_type	_expansion_factor = 2;
 		public:
 			// Contructors
+			// default
 			explicit vector (const allocator_type& alloc = allocator_type())
-			: _arr(alloc.allocate(0)), _size(0), _capacity(0), _allocator(alloc) {}
+			: _arr(NULL), _size(0), _capacity(0), _allocator(alloc) {}
 
+			// fill
 			explicit vector (size_type n, const value_type& val = value_type(),
 								const allocator_type& alloc = allocator_type())
-			: _arr(n), _size(0), _capacity(n), _allocator(alloc) {}
+			: _arr(alloc.allocate(n)), _size(0), _capacity(n), _allocator(alloc) {
+				for (size_t i = 0; i < _size; i++)
+					push_back(val);
+			}
 
+			// range
 			template <class InputIterator>
         	vector (InputIterator first, InputIterator last,
-                	const allocator_type& alloc = allocator_type());
+                	const allocator_type& alloc = allocator_type()) : _size(0), _allocator(alloc) {
+				reserve(std::distance(first, last));
+				while (first != last)
+				{
+					push_back(*first);
+					++first;
+				}
+			}
 
+			// copy
+			vector(const vector &ref) : _arr(alloc.allocate(ref._capacity)), _size(0), _capacity(ref._capacity), _allocator(ref._allocator) {
+				for (size_t i = 0; i < _size; i++)
+					push_back(ref._arr[i]);
+			}
+
+			// destructor
 			~vector() {
 				clear();
-				_allocator.deallocate(_array, _capacity);
-				_capacity = 0;
-				_arr = NULL;
+				_allocator.deallocate(_arr, _capacity);
 			}
 
-
-			vector(const vector &ref) {
-
-			}
-			vector& operator= (const vector& x) {
+			// assignment
+			vector& operator=(const vector& x) {
 				if (this != &x)
 				{
 					clear();
 					if (x._size > _capacity)
 						reserve(_capacity);
 					for (size_t i = 0; i < x._size; i++)
-						_allocator.create(&_arr[i], x[i]);
+						push_back(ref._arr[i]);
 					_size = x._size;
 				}
 				return *this;
 			};
 
-			// iterator begin() { return std::begin(_arr); }
-
-			// const_iterator begin() const { return std::begin(_arr); }
+			iterator begin() { return iterator(_arr); }
+			const_iterator begin() const { return const_iterator(_arr); }
+			iterator end() { return iterator(_arr + _size); }
+			const_iterator end() const { return const_iterator(_arr + _size); }
+			reverse_iterator rbegin() { return reverse_iterator(iterator(_arr)); }
+			const_reverse_iterator rbegin() const { return const_reverse_iterator(iterator(_arr)); }
+			reverse_iterator rend() { return reverse_iterator(iterator(_arr + _size)); }
+			const_reverse_iterator rend() const { return const_reverse_iterator(iterator(_arr + _size)); }
 
 			// Capacity
 			size_type size() const { return _size; };
@@ -87,7 +108,7 @@ namespace ft {
 					if (n > _capacity)
 						reserve(n);
 					for (size_t i = _size; i < n, i++)
-						_allocator.construct(&_arr[i], val);
+						push_back(val);
 				}
 				_size = n;
 			}
@@ -101,26 +122,23 @@ namespace ft {
 
 				if (n > _capacity)
 				{
-					try
+					temp = _allocator.allocate(n, _arr);
+					for (int i = 0; i < _size; i++)
 					{
-						temp = _allocator.allocate(n, _arr);
-						for (int i = 0; i < _size; i++)
-						{
-							_allocator.construct(&temp[i], _arr[i]);
-							_allocator.destroy(&arr[i]);
-						}
-						_allocator.deallocate(_arr, _capacity);
-						_arr = temp;
-						_capacity = n;
+						_allocator.construct(&temp[i], _arr[i]);
+						_allocator.destroy(&arr[i]);
 					}
-					catch(const std::bad_alloc& ba)
-					{
-						throw;
-					}
+					_allocator.deallocate(_arr, _capacity);
+					_arr = temp;
+					_capacity = n;
 				}
 			}
 
 			// Element access:
+			reference operator[](size_type pos) { return _arr[pos]; };
+
+			const_reference operator[](size_type pos) const { return _arr[pos]; };
+
 			reference at(size_type pos) {
 				if (pos >= _size)
 					throw std::out_of_range("vector::_M_range_check");
@@ -133,33 +151,42 @@ namespace ft {
 				return _arr[pos];
 			};
 
-			reference operator[](size_type pos) { return _arr[pos]; };
+			reference front() { return *_arr };
 
-			const_reference operator[](size_type pos) const { return _arr[pos]; };
+			const_reference front() const { return *_arr };
 
-			reference front() { return _arr[0] };
+			reference back() { return _arr[_size - 1]};
 
-			const_reference front() const { return _arr[0] };
-
-			reference back() { return _arr[size - 1]};
-
-			const_reference back() const { return _arr[size - 1]};
+			const_reference back() const { return _arr[_size - 1]};
 
 			// modifiers
-			// template <class InputIterator>
-  			// void assign (InputIterator first, InputIterator last) {
-			// 	for ()
-			// }
+
+			template <class InputIterator>
+			void assign (InputIterator first, InputIterator last) {
+				clear();
+				size_type n = std::distance<value_type>(first, last);
+				if (n > _capacity)
+					reserve(n);
+				while (first != last)
+				{
+					push_back(*first);
+					++first;
+				}
+			}
+
 			void assign (size_type n, const value_type& val) {
-				for (int i = 0; i < n; i++)
-					_arr[i] = val;
+				clear();
+				if (n > _capacity)
+					reserve(n);
+				for (int i = 0; i < n; ++i)
+					push_back(val);
 			}
 
 			void push_back (const value_type& val) {
-				++_size;
 				if (_size >= _capacity)
 					reserve(_capacity * _expansion_factor);
 				_allocator.construct(&_arr[_size], val);
+				++_size;
 			}
 
 			void pop_back() {
@@ -167,21 +194,26 @@ namespace ft {
 				--_size;
 			}
 
-			// iterator insert (iterator position, const value_type& val) {
-			// 	++_size;
-			// 	if (_size >= _capacity)
-			// 		reserve(_capacity * _expansion_factor);
-			// 	for (size_t i = (position - ))
-			// }
+			iterator insert (iterator position, const value_type& val) {
+			}
 
-			// void insert (iterator position, size_type n, const value_type& val) {
+    		void insert (iterator position, size_type n, const value_type& val);
 
-			// }
 
-			// template <class InputIterator>
-			// void insert (iterator position, InputIterator first, InputIterator last) {
+			template <class InputIterator>
+   			void insert (iterator position, InputIterator first, InputIterator last) {
+				size_type	num_elements;
+				size_type	shift_num;
+				size_type	index;
 
-			// }
+				num_elements = std::distance(first, last);
+				index = position - iterator(_arr);
+				shift_num = _size - index;
+				if (_size >= _capacity)
+					reserve((_capacity + num_elements) * _expansion_factor);
+				for (size_type i = index; i < shift_num; ++i)
+
+			}
 
 			void clear()
 			{
@@ -193,7 +225,6 @@ namespace ft {
 			// Allocator
 			allocator_type get_allocator() const { return _allocator; }
 	};
-
 }
 
 #endif
