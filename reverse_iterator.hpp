@@ -17,6 +17,7 @@ namespace ft {
 
 		private:
 			iterator_type _base;
+
 		public:
 			reverse_iterator() : _base(NULL) {}
 			explicit reverse_iterator (iterator_type it) : _base(it) {}

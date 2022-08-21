@@ -6,33 +6,36 @@
 # include <stdexcept>
 # include <iostream>
 # include <algorithm>
-# include "Iterator.hpp"
+# include "VectorIterator.hpp"
 # include "utils.hpp"
 
 namespace ft {
 
 	template < class T, class Alloc = std::allocator<T> >
 	class vector {
+
 		public:
 			// typedefs
 			typedef typename T value_type;
-			typedef typename Alloc allocator_type;
+			typedef Alloc allocator_type;
 			typedef std::size_t size_type;
 			typedef std::ptrdiff_t difference_type;
 			typedef	value_type&	reference;
 			typedef const value_type& const_reference;
 			typedef allocator_type::pointer pointer;
 			typedef allocator_type::const_pointer const_pointer;
-			typedef ft::Iterator<T> iterator;
-			typedef ft::Iterator<const T> const_iterator;
+			typedef ft::VectorIterator<value_type> iterator;
+			typedef ft::VectorIterator<const value_type> const_iterator;
 			typedef std::reverse_iterator<iterator> reverse_iterator;
 			typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
 		private:
 			static const size_type	_expansion_factor = 2;
 			pointer					_arr;
 			size_type				_size;
 			size_type				_capacity;
 			allocator_type			_allocator;
+			
 		public:
 			// Contructors
 			// default
@@ -44,17 +47,17 @@ namespace ft {
 								const allocator_type& alloc = allocator_type())
 			: _arr(alloc.allocate(n)), _size(0), _capacity(n), _allocator(alloc) {
 				for (size_t i = 0; i < _size; i++)
-					push_back(val);
+					this->push_back(val);
 			}
 
 			// range
-			template <class InputIterator, typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type>
+			template < class InputIterator, ft::enable_if<!ft::is_integral<InputIterator>::value, void>::type* = NULL >
         	vector (InputIterator first, InputIterator last,
                 	const allocator_type& alloc = allocator_type()) : _size(0), _allocator(alloc) {
-				reserve(std::distance(first, last));
+				this->reserve(std::distance(first, last));
 				while (first != last)
 				{
-					push_back(*first);
+					this->push_back(*first);
 					++first;
 				}
 			}
@@ -62,12 +65,12 @@ namespace ft {
 			// copy
 			vector(const vector &ref) : _arr(alloc.allocate(ref._capacity)), _size(0), _capacity(ref._capacity), _allocator(ref._allocator) {
 				for (size_t i = 0; i < _size; i++)
-					push_back(ref._arr[i]);
+					this->push_back(ref._arr[i]);
 			}
 
 			// destructor
 			~vector() {
-				clear();
+				this->clear();
 				_allocator.deallocate(_arr, _capacity);
 			}
 
@@ -75,12 +78,11 @@ namespace ft {
 			vector& operator=(const vector& x) {
 				if (this != &x)
 				{
-					clear();
+					this->clear();
 					if (x._size > _capacity)
-						reserve(_capacity);
+						this->reserve(x._size);
 					for (size_t i = 0; i < x._size; i++)
-						push_back(ref._arr[i]);
-					_size = x._size;
+						this->push_back(ref._arr[i]);
 				}
 				return *this;
 			};
@@ -97,7 +99,6 @@ namespace ft {
 
 			// Capacity
 			size_type size() const { return _size; };
-
 			size_type max_size() const { return _allocator.max_size(); };
 
 			void resize (size_type n, value_type val = value_type()) {
@@ -109,9 +110,9 @@ namespace ft {
 				else if (n > _size)
 				{
 					if (n > _capacity)
-						reserve(n);
+						this->reserve(n);
 					for (size_t i = _size; i < n, i++)
-						push_back(val);
+						this->push_back(val);
 				}
 				_size = n;
 			}
@@ -129,7 +130,6 @@ namespace ft {
 					for (int i = 0; i < _size; i++)
 					{
 						_allocator.construct(&temp[i], _arr[i]);
-						// temp[i] = _arr[i];
 						_allocator.destroy(&arr[i]);
 					}
 					_allocator.deallocate(_arr, _capacity);
@@ -163,32 +163,36 @@ namespace ft {
 
 			const_reference back() const { return _arr[_size - 1]};
 
+			value_type* data() noexcept{ return _arr; }
+
+			const value_type* data() const noexcept{ return _arr; }
+
 			// modifiers
 
-			template <class InputIterator, typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type * = nullptr>
+			template <class InputIterator, typename ft::enable_if<!ft::is_integral<InputIterator>::value, void>::type* = NULL>
 			void assign (InputIterator first, InputIterator last) {
-				clear();
+				this->clear();
 				size_type n = std::distance<value_type>(first, last);
 				if (n > _capacity)
-					reserve(n);
+					this->reserve(n);
 				while (first != last)
 				{
-					push_back(*first);
+					this->push_back(*first);
 					++first;
 				}
 			}
 
 			void assign (size_type n, const value_type& val) {
-				clear();
+				this->clear();
 				if (n > _capacity)
-					reserve(n);
-				for (int i = 0; i < n; ++i)
-					push_back(val);
+					this->reserve(n);
+				for (int i = 0; i < n; i++)
+					this->push_back(val);
 			}
 
 			void push_back (const value_type& val) {
 				if (_size >= _capacity)
-					reserve(_capacity * _expansion_factor);
+					this->reserve(_capacity * _expansion_factor);
 				_allocator.construct(&_arr[_size], val);
 				++_size;
 			}
@@ -199,36 +203,36 @@ namespace ft {
 			}
 
 			iterator insert (iterator position, const value_type& val) {
-				insert(position, 1, val);
+				this->insert(position, 1, val);
 				return position;
 			}
 
     		void insert (iterator position, size_type n, const value_type& val) {
 				pointer temp;
-				size_t	i = -1;
+
 				temp = _allocator.allocate(n);
-				while (++i)
-					_temp[i] = val;
-				insert(position, iterator(temp), iterator(temp + i));
+				for (size_type i = 0; i < n, i++)
+					_allocator.construct(&_temp[i], val);
+				this->insert(position, iterator(temp), iterator(temp + i));
 			}
 
-
-			template <class InputIterator, typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type * = nullptr>
-   			void insert (iterator position, InputIterator first, InputIterator last) {
+			// template <class InputIterator, typename ft::enable_if<!ft::is_integral<InputIterator>::value, void>::type* = NULL>
+			template <class InputIterator>
+   			void insert (iterator position, InputIterator first, InputIterator last, typename ft::enable_if<!ft::is_integral<InputIterator>::value, void>::type* = NULL) {
 				size_type	num_elements;
 				size_type	elems_to_shift;
 				size_type	index;
 
 				num_elements = std::distance(first, last);
 				index = position - iterator(_arr);
-				elems_to_shift = end() - position;
-				if ((_size + num_elements) >= _capacity)
-					reserve((_capacity + num_elements) * _expansion_factor);
+				elems_to_shift = this->end() - position;
+				if ((_size + num_elements) > _capacity)
+					this->reserve((_capacity + num_elements) * _expansion_factor);
 				if (index == (_size - 1))
 				{
 					while (first != last)
 					{
-						push_back(*first);
+						this->push_back(*first);
 						++first;
 					}
 				}
@@ -237,8 +241,9 @@ namespace ft {
 						_arr[index + num_elements + elems_to_shift] = _arr[index + elems_to_shift];
 					while(first != last)
 					{
-						_arr[index++] = *first;
+						_arr[index] = *first;
 						++first;
+						index++;
 					}
 				}
 			}
@@ -252,7 +257,7 @@ namespace ft {
 				iterator	start;
 				size_type	elem_num;
 
-				arr_end = end();
+				arr_end = this->end();
 				start = first;
 				elem_num = std::distance(last, arr_end);
 				while (last != arr_end)
@@ -262,7 +267,7 @@ namespace ft {
 					++last;
 				}
 				for (size_type i = 0; i < elem_num; ++i)
-					pop_back();
+					this->pop_back();
 				return (start);
 			}
 
@@ -281,6 +286,7 @@ namespace ft {
 
 			// Allocator
 			allocator_type get_allocator() const { return _allocator; }
+
 		// Non-member function overloads
 		// relational operators
 
@@ -308,7 +314,7 @@ namespace ft {
 
 		template <class T, class Alloc>
 		bool operator>(const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) {
-			return rhs < lhs;
+			return rhs <> lhs;
 		}
 
 		template <class T, class Alloc>
