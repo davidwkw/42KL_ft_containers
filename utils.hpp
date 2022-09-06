@@ -1,3 +1,6 @@
+#ifndef UTILS_HPP
+# define UTILS_HPP
+
 # include <algorithm>
 
 namespace ft {
@@ -11,10 +14,10 @@ namespace ft {
 	// is_integral
 	template <class T, T v>
 	struct integral_constant {
-		static constexpr T value = v;
+		enum {value = v};
 		typedef T value_type;
 		typedef integral_constant<T,v> type;
-		constexpr operator T() { return v; }
+		operator T() { return v; }
 	};
 
 	typedef integral_constant<bool,false> false_type;
@@ -31,14 +34,14 @@ namespace ft {
 	template<> struct is_integral_base<unsigned short> : true_type {};
 	template<> struct is_integral_base<long> : true_type {};
 	template<> struct is_integral_base<unsigned long> : true_type {};
-	template<> struct is_integral_base<long long> : true_type {};
-	template<> struct is_integral_base<unsigned long long> : true_type {};
+	// Not c++98
+	// template<> struct is_integral_base<long long> : true_type {};
+	// template<> struct is_integral_base<unsigned long long> : true_type {};
 
 	template< class T >
 	struct is_integral : is_integral_base<T> {};
 
 	// equal
-
 	template <class InputIterator1, class InputIterator2>
 	bool equal (InputIterator1 first1, InputIterator1 last1,
               InputIterator2 first2) {
@@ -92,7 +95,6 @@ namespace ft {
 	}
 
 	// std::pair
-
 	template< class T1, class T2 >
 	struct pair {
 		typedef T1 first_type;
@@ -101,12 +103,12 @@ namespace ft {
 		first_type first;
 		second_type second;
 
-		pair() : first(), second() {}
+		pair() : first(), second(){}
 
 		template<class U, class V>
-		pair (const pair<U,V>& pr) : first(pr.first), second(pr.second);
+		pair (const pair<U,V>& pr) : first(pr.first), second(pr.second){}
 
-		pair (const first_type& a, const second_type& b) : first(a), second(b);
+		pair (const first_type& a, const second_type& b) : first(a), second(b){}
 
 		pair& operator=(const pair& pr) {
 			if (this != &pr) {
@@ -160,4 +162,30 @@ namespace ft {
 		typedef Arg2 second_argument_type;
 		typedef Result result_type;
   	};
+
+	// std::conditional
+	template<bool B, class T, class F>
+	struct conditional { typedef T type; };
+	
+	template<class T, class F>
+	struct conditional<false, T, F> { typedef F type; };
+	
+	// std::is_same
+	template<typename T, typename U>
+	struct is_same 
+	{
+		enum { value = false }; 
+	};
+
+	template<typename T>
+	struct is_same<T,T>  //specialization
+	{ 
+		enum { value = true }; 
+	};
+
+	// std::is_const
+	template<class T> struct is_const          : false_type {};
+	template<class T> struct is_const<const T> : true_type {};
 }
+
+#endif

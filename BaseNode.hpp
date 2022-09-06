@@ -1,6 +1,6 @@
-#ifndef BNODE_HPP
+#ifndef BASE_NODE_HPP
 
-#define BNODE_HPP
+#define BASE_NODE_HPP
 #include "utils.hpp"
 
 namespace ft {
@@ -8,9 +8,8 @@ namespace ft {
 	template <class NodeType >
 	struct BaseNode {
 
-		typedef typename NodeType node_type;
-		typedef typename node_type* node_pointer;
-		typedef typename node_type const* const_node_pointer;
+		typedef NodeType *node_pointer;
+		typedef const NodeType *const_node_pointer;
 
 		node_pointer parent;
 		node_pointer left;
@@ -68,7 +67,7 @@ namespace ft {
 			return temp;
 		}
 
-		static node_pointer *predecessor(node_pointer node){
+		static node_pointer predecessor(node_pointer node){
 			node_pointer x = node;
 			node_pointer y;
 
@@ -85,9 +84,46 @@ namespace ft {
 			return x;
 		}
 
-		static node_pointer *successor(node_pointer node){
+		static const_node_pointer predecessor(const_node_pointer node){
+			const_node_pointer x = node;
+			const_node_pointer y;
+
+			if (x->left != NULL)
+				return max(x->left);
+			y = x->parent;
+			// while (y != NULL && x == y->left){
+			while (x == y->left){
+				x = y;
+				y = y->parent;
+			}
+			x = y;
+			// return y;
+			return x;
+		}
+
+		static node_pointer successor(node_pointer node){
 			node_pointer x = node;
 			node_pointer y;
+
+			if (x->right != NULL)
+				return min(x->right);
+			else {
+				y = x->parent;
+				//while (y != NULL && x == y->right){ // y != NULL is redundant if binary tree has header node. NULL->will trigger error.
+				while (x == y->right){
+					x = y;
+					y = y->parent;
+				}
+				if (x->right != y)
+         			x = y;
+				// return y;
+				return x;
+			}
+		}
+
+		static const_node_pointer successor(const_node_pointer node){
+			const_node_pointer x = node;
+			const_node_pointer y;
 
 			if (x->right != NULL)
 				return min(x->right);

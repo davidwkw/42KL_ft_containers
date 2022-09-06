@@ -1,13 +1,19 @@
-#ifndef INTERATOR_HPP
+#ifndef VECTOR_ITERATOR_HPP
 
-#define ITERATOR_HPP
+#define VECTOR_ITERATOR_HPP
 
 #include <iterator>
 
 namespace ft {
 
 	template <typename T>
-	struct VectorIterator : public std::iterator<std::random_access_iterator_tag, T>{
+	struct VectorIterator{
+
+		typedef T value_type;
+		typedef T* pointer;
+		typedef T& reference;
+		typedef std::ptrdiff_t  difference_type;
+		typedef std::random_access_iterator_tag  iterator_category;
 
 		pointer ptr;
 
@@ -29,19 +35,23 @@ namespace ft {
 		reference operator[](const difference_type i) const { return ptr[i]; }
 		pointer operator->() const { return ptr; }
 
-		friend bool operator==(const VectorIterator& lhs, const VectorIterator& rhs) { return lhs.ptr == rhs.ptr; }
-		friend bool operator!=(const VectorIterator& lhs, const VectorIterator& rhs) { return !(lhs.ptr == rhs.ptr); }
-		friend bool operator<(const VectorIterator& lhs, const VectorIterator& rhs) {
+		friend bool operator==(const VectorIterator& lhs, const VectorIterator& rhs){
+			return lhs.ptr == rhs.ptr;
+		}
+		friend bool operator!=(const VectorIterator& lhs, const VectorIterator& rhs){ 
+			return !(lhs == rhs);
+		}
+		friend bool operator<(const VectorIterator& lhs, const VectorIterator& rhs){
 			return lhs.ptr < rhs.ptr;
 		}
-		friend bool operator<=(const VectorIterator& lhs, const VectorIterator& rhs) {
-			return !(rhs.ptr < lhs.ptr);
+		friend bool operator<=(const VectorIterator& lhs, const VectorIterator& rhs){
+			return !(lhs > rhs);
 		}
-		friend bool operator>(const VectorIterator& lhs, const VectorIterator& rhs) {
-			return rhs.ptr < lhs.ptr;
+		friend bool operator>(const VectorIterator& lhs, const VectorIterator& rhs){
+			return rhs < lhs;
 		}
-		friend bool operator>=(const VectorIterator& lhs, const VectorIterator& rhs) {
-			return !(lhs.ptr < rhs.ptr);;
+		friend bool operator>=(const VectorIterator& lhs, const VectorIterator& rhs){
+			return !(lhs < rhs);
 		}
 
 		VectorIterator& operator++() {
@@ -50,7 +60,7 @@ namespace ft {
 		}
 		VectorIterator operator++(int) {
 			VectorIterator tmp(*this);
-			operator++();
+			++(*this);
 			return tmp;
 		}
 		VectorIterator& operator--() {
@@ -59,30 +69,44 @@ namespace ft {
 		}
 		VectorIterator operator--(int) {
 			VectorIterator tmp(*this);
-			operator--();
+			--(*this);
 			return tmp;
 		}
-		VectorIterator operator+(const difference_type i) const {
+		VectorIterator operator+(difference_type i) const {
 			return VectorIterator(ptr + i);
 		}
-		friend VectorIterator operator+(const difference_type i, const VectorIterator& rhs) {
+		friend VectorIterator operator+(difference_type i, const VectorIterator& rhs) {
 			return VectorIterator(i + rhs.ptr);
 		}
-		VectorIterator operator-(const difference_type i) const {
+		VectorIterator operator-(difference_type i) const {
 			return VectorIterator(ptr - i);
 		}
+
 		difference_type operator-(const VectorIterator& rhs) const {
 			return ptr - rhs.ptr;
 		}
-		VectorIterator& operator+=(const difference_type i) {
+
+		VectorIterator& operator+=(difference_type i) {
 			ptr += i;
 			return *this;
 		}
-		VectorIterator& operator-=(const difference_type i) {
+		VectorIterator& operator-=(difference_type i) {
 			ptr -= i;
 			return *this;
 		}
 	};
+
+	template <class T>
+	std::ptrdiff_t operator-(const VectorIterator<const T>& lhs,
+							const VectorIterator<T>& rhs) {
+		return std::distance(static_cast<VectorIterator<const T> >(rhs), lhs);
+	}
+
+	template <class T>
+	std::ptrdiff_t operator-(const VectorIterator<T>& lhs,
+							const VectorIterator<const T>& rhs) {
+		return std::distance(rhs, static_cast<VectorIterator<const T> >(lhs));
+	}
 }
 
 #endif

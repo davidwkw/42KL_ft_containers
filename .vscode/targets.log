@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Aug 21 17:47:29 2022
+# Make data base, printed on Mon Aug 29 15:47:47 2022
 
 # Variables
 
@@ -55,7 +55,7 @@ PATH = /home/davidwang/.vscode-server/bin/e4503b30fc78200f846c62cf8091b76ff55476
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-ad5a728e-0526-44da-82f0-d80c2a103b39.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-7a4dae64-ba7f-42f3-ab11-cd4b6e1be263.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -138,17 +138,16 @@ SUFFIXES :=
 .INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
 # default
 .RECIPEPREFIX := 
- 
-make: *** No rule to make target 'main.o', needed by 'ft_containers'.  Stop.
-
 # environment
 LANG = C
 # environment
 TERM = xterm-256color
 # environment
 WSL_DISTRO_NAME = Ubuntu
+# environment
+MOTD_SHOWN = update-motd
 # variable set hash-table stats:
-# Load=67/1024=7%, Rehash=0, Collisions=6/99=6%
+# Load=68/1024=7%, Rehash=0, Collisions=6/100=6%
 
 # Pattern-specific Variable Values
 
@@ -156,9 +155,9 @@ WSL_DISTRO_NAME = Ubuntu
 
 # Directories
 
-# . (device 14, inode 281474977152522): 18 files, no impossibilities.
+# . (device 14, inode 281474977152522): 19 files, no impossibilities.
 
-# 18 files, no impossibilities in 1 directories.
+# 19 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -189,7 +188,7 @@ test/test_vector.cpp:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-20 22:08:40.1179227
+#  Last modified 2022-08-21 21:28:27.77742
 #  File has been updated.
 #  Successfully updated.
 
@@ -256,12 +255,14 @@ main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 31 / storage = 331 B / avg = 10 B
-# current buf: size = 8162 B / used = 331 B / count = 31 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 32 / storage = 348 B / avg = 10 B
+# current buf: size = 8162 B / used = 348 B / count = 32 / avg = 10 B
 
-# strcache performance: lookups = 51 / hit rate = 39%
+# strcache performance: lookups = 52 / hit rate = 38%
 # hash-table stats:
-# Load=31/8192=0%, Rehash=0, Collisions=1/51=2%
-# Finished Make data base on Sun Aug 21 17:47:29 2022
+# Load=32/8192=0%, Rehash=0, Collisions=1/52=2%
+# Finished Make data base on Mon Aug 29 15:47:47 2022
 
  
+make: *** No rule to make target 'main.o', needed by 'ft_containers'.  Stop.
+

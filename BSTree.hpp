@@ -1,12 +1,13 @@
-#ifndef BNODE_HPP
+#ifndef BSTREE_HPP
 
-#define BNODE_HPP
+#define BSTREE_HPP
 #include <limits>
 #include <algorithm>
 #include <functional>
 #include "utils.hpp"
 #include "BSTNode.hpp"
 #include "BinaryNodeIterator.hpp"
+#include "reverse_iterator.hpp"
 
 namespace ft {
 
@@ -14,17 +15,26 @@ namespace ft {
 	class BSTree {
 		public:
 			typedef T value_type;
-			typedef T& reference;
-			typedef T* pointer;
-			typedef typename BSTNode<value_type> node_type;
-			typedef node_type* node_pointer;
-			typedef node_type& node_refeerence;
-			typedef typename ft::BinaryNodeIterator<node_type> iterator;
-			typedef typename ft::BinaryNodeIterator<const node_type> const_iterator;
-			typedef std::size_t size_type;
-			typedef Compare key_compare;
 			typedef Alloc allocator_type;
-			typedef typename Alloc::template rebind< BSTNode<value_type> >::other node_allocator_type;
+			typedef Compare key_compare;
+			typedef typename allocator_type::reference reference;
+			typedef typename allocator_type::const_reference const_reference;
+			typedef typename allocator_type::pointer pointer;
+			typedef typename allocator_type::const_pointer const_pointer;
+			typedef BSTNode<value_type> node_type;
+			typedef typename Alloc::template rebind< node_type >::other node_allocator_type;
+			typedef typename node_allocator_type::reference node_reference;
+			typedef typename node_allocator_type::const_reference const_node_reference;
+			typedef typename node_allocator_type::pointer node_pointer;
+			typedef typename node_allocator_type::const_pointer const_node_pointer;
+			typedef BinaryNodeIterator<node_type> iterator;
+			typedef BinaryNodeIterator<const node_type> const_iterator;
+			// typedef BinaryNodeIterator<value_type> iterator;
+			// typedef ConstBinaryNodeIterator<value_type> const_iterator;
+			typedef ft::reverse_iterator<iterator> reverse_iterator;
+			typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+			typedef typename iterator_traits<iterator>::difference_type difference_type;
+			typedef std::size_t size_type;
 		
 		private:
 
@@ -38,8 +48,8 @@ namespace ft {
 				return _node_allocator.allocate(1);
 			}
 
-			void deallocate_node(node_pointer ptr, size_type n){
-				_node_allocator.deallocate(ptr, n);
+			void deallocate_node(node_pointer ptr){
+				_node_allocator.deallocate(ptr, 1);
 			}
 
 			void construct_node(node_pointer ptr, value_type val){
@@ -50,8 +60,8 @@ namespace ft {
 				_node_allocator.destroy(ptr);
 			}
 
-			node_pointer _find(node_pointer node, const value_type& key){
-				node_pointer temp = (node == &header ? node->parent : node);
+			node_pointer _find(node_pointer node, const value_type& key){ 
+				node_pointer temp = (node == &_header ? node->parent : node);
 				
 				while (temp != NULL && (_compare(key, temp->key) == true || _compare(temp->key, key) == true))
 				{
@@ -60,6 +70,23 @@ namespace ft {
 					else
 						temp = temp->right;
 				}
+				if (temp == NULL)
+					temp = &_header;
+				return temp;
+			}
+
+			const_node_pointer _find(node_pointer node, const value_type& key) const{ 
+				const_node_pointer temp = (node == &_header ? node->parent : node);
+				
+				while (temp != NULL && (_compare(key, temp->key) == true || _compare(temp->key, key) == true))
+				{
+					if (_compare(key, temp->key) == true)
+						temp = temp->left;
+					else
+						temp = temp->right;
+				}
+				if (temp == NULL)
+					temp = &_header;
 				return temp;
 			}
 			
@@ -68,13 +95,14 @@ namespace ft {
 
 				temp = allocate_node();
 				construct_node(temp, val);
-				return this->_insert(position, temp);
+				return this->_insert(temp, position);
 			}
 
-			node_pointer _insert(node_pointer position, node_pointer node){
-				node_pointer y = NULL;
-				node_pointer x = (position == &_header ? header->parent : position);
+			node_pointer _insert(node_pointer node, node_pointer position){
+				node_pointer x = (position == &_header ? _header.parent : position);
+				node_pointer y = &_header;
 				
+				// Finding where the parent is..
 				while (x != NULL)
 				{
 					y = x;
@@ -84,27 +112,28 @@ namespace ft {
 						x = x->right;
 				}
 				node->parent = y;
-				if (y == NULL){
-					_header->parent = node;
-					_header->left = node;
-					_header->right = node;
+				// Finding where to place child..
+				if (y == &_header){
+					_header.parent = node;
+					_header.left = node;
+					_header.right = node;
 				}
 				else if (_compare(node->key, y->key) == true){
 					y->left = node;
-					if (_compare(node->key, header.left->key) == true)							
+					if (_compare(node->key, _header.left->key) == true)							
 						_header.left = node;
 				}
 				else{
 					y->right = node;
-					if (_compare(header.right->key, node->key) == true)
+					if (_compare(_header.right->key, node->key) == true)
 						_header.right = node;
 				}
 				++_node_count;
-				return position;
+				return node;
 			}
 
 			void _transplant(node_pointer u, node_pointer v){
-				if (u->parent == NULL)
+				if (u->parent == &_header)
 					_header.parent = v;
 				else if (u == u->parent->left)
 					u->parent->left = v;
@@ -115,35 +144,101 @@ namespace ft {
 			}
 
 			void _erase(node_pointer node){
+				node = (node == &_header ? _header.parent : node);
 				node_pointer y;
 				
 				if (node->left == NULL){
-					if (node == _header.left)
-						_header.left = (node.right == NULL ? node->parent : node->right);
-					else if (node == _header.right)
-						_header.right = node->parent;
-					this->transplant_node(node, node->right);
+					if (node == _header.left){
+						_header.left = node_type::successor(node);
+						if (_header.left == &_header)
+							_header.right = &_header;
+					}
+					this->_transplant(node, node->right);
 				}
 				else if (node->right == NULL){
 					if (node == _header.right)
-						_header.right = node_type::max(node->left);
-					this->transplant_node(node, node->left);
+						_header.right = node_type::predecessor(node);
+					this->_transplant(node, node->left);
 				}
 				else {
-					y = node_type::min(node);
+					y = node_type::min(node->right);
 					if (y->parent != node)
 					{
-						this->transplant_node(y, y->right);
+						this->_transplant(y, y->right);
 						y->right = node->right;
 						y->right->parent = y;
 					}
-					this->transplant_node(node, y);
+					this->_transplant(node, y);
 					y->left = node->left;
 					y->left->parent = y;
 				}
 				this->destroy_node(node);
-				this->deallocate_node(node, 1);
+				this->deallocate_node(node);
 				--_node_count;
+			}
+
+			node_pointer _lower_bound (const value_type& k){
+				node_pointer x = _header.parent;
+				node_pointer y = &_header;
+
+				while (x != NULL){
+					if(_compare(k, x->key) == true){
+						x = x->left;
+						y = x;
+					}
+					else if (_compare(x->key, k) == false)
+						return x;
+					else
+						x = x->right;	
+				}
+				return y;
+			}
+
+			const_node_pointer _lower_bound (const value_type& k) const{
+				const_node_pointer x = _header.parent;
+				const_node_pointer y = &_header;
+
+				while (x != NULL){
+					if(_compare(k, x->key) == true){
+						x = x->left;
+						y = x;
+					}
+					else if (_compare(x->key, k) == false)
+						return x;
+					else
+						x = x->right;	
+				}
+				return y;
+			}
+
+			node_pointer _upper_bound (const value_type& k){
+				node_pointer x = _header.parent;
+				node_pointer y = &_header;
+
+				while (x != NULL){
+					if (_compare(x->key, k) == true){
+						y = x;
+                		x = x->left;
+					}
+					else
+						x = x->right;
+				}
+				return y;				
+			}
+
+			const_node_pointer _upper_bound (const value_type& k) const{
+				const_node_pointer x = _header.parent;
+				const_node_pointer y = &_header;
+
+				while (x != NULL){
+					if (_compare(x->key, k) == true){
+						y = x;
+                		x = x->left;
+					}
+					else
+						x = x->right;
+				}
+				return y;				
 			}
 
 		public:
@@ -157,24 +252,20 @@ namespace ft {
 			BSTree (InputIterator first, InputIterator last,
 				const key_compare& comp = key_compare(),
 				const allocator_type& alloc = allocator_type()) : _header(), _node_count(0), _allocator(alloc), _compare(comp), _node_allocator() {
-				while (first != last){
-					this->insert(first);
-					++first;
-				}
+				this->_insert(first, last);
 			}
 
 			BSTree(const BSTree &ref) : _header(), _node_count(0), _allocator(ref._allocator), _compare(ref._compare), _node_allocator(ref._node_allocator){
 				*this = ref;
-			};
+			}
 
 			BSTree &operator=(const BSTree &ref){
 				if (*this != ref){
 					this->clear();	
-					for (ref::iterator it = ref.begin(); it != ref.end(); it++)
-						this->insert(*it);
+					this->_insert(ref.begin(), ref.end());
 				}
 				return *this;
-			};
+			}
 
 			~BSTree(){
 				this->clear();
@@ -182,20 +273,20 @@ namespace ft {
 
 			// Getters
 			node_pointer get_root() const{ return _header.parent; }
-			node_pointer get_header() const{ return &_header; }
 			size_type get_node_count() const{ return _node_count; }
 			allocator_type get_allocator() const{ return _allocator; }
+			key_compare		get_compare() const{ return _compare; }
 			node_allocator_type get_node_allocator() const{ return _node_allocator; }
 
 			// Iterators
 			iterator begin() { return iterator(_header.left); }
-			const_iterator begin() const { return const_iterator(_header.left); }
-			iterator end() { return iterator(&_header)};
-			const_iterator end() const { return const_iterator(&_header); }
-			reverse_iterator rbegin() { return ft::reverse_iterator(iterator(_header.left)); }
-			const_reverse_iterator rbegin() const { return const_reverse_iterator(iterator(_header.left)); }
-			reverse_iterator rend() { return reverse_iterator(iterator(&_header)); }
-			const_reverse_iterator rend() const { return const_reverse_iterator(iterator(&_header)); }
+			const_iterator begin() const { return const_iterator(static_cast<const_node_pointer>(_header.left)); }
+			iterator end() { return iterator(&_header); }
+			const_iterator end() const { return const_iterator(static_cast<const_node_pointer>(&_header)); }
+			reverse_iterator rbegin() { return reverse_iterator(this->end()); }
+			const_reverse_iterator rbegin() const { return const_reverse_iterator(this->end()); }
+			reverse_iterator rend() { return reverse_iterator(this->begin()); }
+			const_reverse_iterator rend() const { return const_reverse_iterator(this->begin()); }
 
 			// Size
 			size_type empty() const { return _node_count == 0; }
@@ -203,30 +294,44 @@ namespace ft {
 			size_type max_size() const { return std::numeric_limits<size_type>::max(); }
 
 			// Element Access
-			reference operator[] (const reference val) {
+			reference operator[] (reference val) {
 				return (this->find(val))->key;
 			}
 
 			// Operations
+			iterator find(iterator position, const value_type& key){
+				node_pointer node;
+
+				node = this->_find(position.ptr, key);
+				return iterator(node);
+			}
+
+			const_iterator find (iterator position, const value_type& key) const{
+				const_node_pointer node;
+
+				node = this->_find(position.ptr, key);
+				return const_iterator(node);
+			}
+
 			iterator find(const value_type& key){
 				node_pointer node;
 
 				node = this->_find(_header.parent, key);
-				return node ? iterator(node) : this->end();
+				return iterator(node);
 			}
 
-			const_iterator find (const value_type& k) const{
-				node_pointer node;
+			const_iterator find (const value_type& key) const{
+				const_node_pointer node;
 
-				node = _find(_header.parent, key);
-				return node ? const_iterator(node) : end();
+				node = this->_find(_header.parent, key);
+				return const_iterator(node);
 			}
 
-			size_type count(const value_type& key){
+			size_type count(const value_type& key) const{
 				size_type num = 0;
 				node_pointer temp = _header.parent;
 
-				while (this->_find(temp, key) != NULL){
+				while (this->_find(key, temp) != &_header){
 					temp = temp->right;
 					++num;
 				}
@@ -234,72 +339,22 @@ namespace ft {
 			}
 
 			iterator lower_bound (const value_type& k){
-				iterator it;
-
-				for (it = this->begin(); it != this->end(); it++)
-				{
-					if (_compare(k, *it) == false)
-						break;
-				}
-				return it;
+				return iterator(this->_lower_bound(k));
 			}
 			
 			const_iterator lower_bound (const value_type& k) const{
-				const_iterator it;
-
-				for (it = this->begin(); it != this->end(); it++)
-				{
-					if (_compare(k, *it) == false)
-						break;
-				}
-				return it;
+				return const_iterator(this->_lower_bound(k));
 			}
 
 			iterator upper_bound (const value_type& k){
-				iterator it;
-
-				for (it = this->begin(); it != this-this->>end(); it++)
-				{
-					if (_compare(*it, k) == true)
-						break;
-				}
-				return it;
+				return iterator(this->_upper_bound(k));
 			}
 
 			const_iterator upper_bound (const value_type& k) const{
-				const_iterator it;
-
-				for (it = this->begin(); it != this->end(); it++)
-				{
-					if (_compare(*it, k) == true)
-						break;
-				}
-				return it;
-			}
-
-			pair<iterator,iterator> equal_range (const value_type& k){
-				iterator lower = this->lower_bound(k)
-				iterator upper = this->upper_bound(k);
-				return ft::make_pair(lower, upper);
-			}
-
-			pair<const_iterator,const_iterator> equal_range (const value_type& k) const{
-				const_iterator lower = this->lower_bound(k)
-				const_iterator upper = this->upper_bound(k);
-				return ft::make_pair(lower, upper);
+				return const_iterator(this->_upper_bound(k));
 			}
 
 			// Modifiers
-			// ft::pair<iterator,bool> insert (const value_type& val){
-			// 	iterator it;
-				
-			// 	it = this->find(val);
-			// 	if (it == this->end())
-			// 		return ft::make_pair(this->insert(val), false);
-			// 	else
-			// 		return ft::make_pair(this->insert(val), true);
-			// }
-
 			iterator insert (iterator position, const value_type& val){
 				return iterator(this->_insert(position.ptr, val));
 			}
@@ -308,21 +363,17 @@ namespace ft {
   			void insert (InputIterator first, InputIterator last){
 				while (first != last)
 				{
-					this->_insert(&_header, first->key);
+					this->_insert(&_header, *first);
 					++first;
 				}
 			}
 
-			void swap (map& x){
+			void swap (BSTree& x){
 				std::swap<node_type>(_header, x._header);
 				std::swap<size_type>(_node_count, x._node_count);
 				std::swap<allocator_type>(_allocator, x._allocator);
 				std::swap<key_compare>(_compare, x._compare);
 				std::swap<node_allocator_type>(_node_allocator, x._node_allocator);
-			}
-
-			void erase (iterator position){
-				this->_erase(position.ptr);
 			}
 	
 			size_type erase (const value_type& k){
@@ -330,28 +381,57 @@ namespace ft {
 				iterator it;
 
 				it = this->find(k);
-				while (it != this->end())
+				while (it != this->end() && (_compare(k, *it) == false && _compare(*it, k) == false))
 				{
-					if (_compare(k, *it) == false && _compare(*it, k) == false){
-						this->erase(it);
-						++num_erased;
-					}
-					++it;
+					this->erase(it++);
+					++num_erased;
 				}
+				// while (it != this->end()){
+				// 	iterator temp;
+				// 	temp = it++;
+				// 	if(_compare(k, *temp) == false && _compare(*temp, k) == false){
+				// 		this->erase(temp);
+				// 		++num_erased;
+				// 	}
+				// }
 				return num_erased;
+			}
+
+			void erase (iterator position){
+				this->_erase(position.ptr);
 			}
 
 			void erase (iterator first, iterator last){
 				while (first != last)
-				{
-					this->erase(it);
-					++first;
-				}
+					this->erase(first++);
 			}
 
 			void clear(){
-				for (iterator it = this->begin(); it != this->end(); it++)
-					this->erase(it);
+				this->erase(this->begin(), this->end());
+			}
+
+			friend bool operator== ( const BSTree& lhs, const BSTree& rhs ){
+				return lhs._node_count == rhs._node_count && ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+			}
+			
+			friend bool operator!= ( const BSTree& lhs, const BSTree& rhs ){
+				return !(lhs == rhs);
+			}
+			
+			friend bool operator<  ( const BSTree& lhs, const BSTree& rhs ){
+				return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+			}
+			
+			friend bool operator<= ( const BSTree& lhs, const BSTree& rhs ){
+				return !(rhs < lhs);
+			}
+			
+			friend bool operator>  ( const BSTree& lhs, const BSTree& rhs ){
+				return rhs < lhs;
+			}
+			
+			friend bool operator>= ( const BSTree& lhs, const BSTree& rhs ){
+				return !(lhs < rhs);
 			}
 	};
 }
