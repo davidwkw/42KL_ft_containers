@@ -125,12 +125,15 @@ namespace ft {
 				if (it == this->end()){
 					return _base.insert(it, val);
 				}
-				return _base.insert(it, val);
+				return it;
 			}
 
 			template <class InputIterator>
 			void insert (InputIterator first, InputIterator last){
-				_base.insert(first, last);
+				while (first != last){
+					this->insert(*first);
+					++first;
+				}
 			}
 
 			void erase (iterator position){

@@ -263,6 +263,9 @@ namespace ft {
 			BSTree(const BSTree &ref) : _header(), _node_count(ref._node_count), _allocator(ref._allocator), _compare(ref._compare), _node_allocator(ref._node_allocator){
 				_header = allocate_node();
 				construct_node(_header, value_type());
+				_header->parent = NULL;
+				_header->left = _header;
+				_header->right = _header;
 				*this = ref;
 			}
 
