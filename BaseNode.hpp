@@ -70,17 +70,21 @@ namespace ft {
 		static node_pointer predecessor(node_pointer node){
 			node_pointer x = node;
 			node_pointer y;
-
+			
+			// if (x->parent != NULL && x->parent->parent == x)
+      		// 	x = x->right;
 			if (x->left != NULL)
 				return max(x->left);
-			y = x->parent;
-			// while (y != NULL && x == y->left){
-			while (x == y->left){
+			else {
+				y = x->parent;
+				// while (y != NULL && x == y->left){
+				while (x == y->left){
+					x = y;
+					y = y->parent;
+				}
 				x = y;
-				y = y->parent;
+				// return y;
 			}
-			x = y;
-			// return y;
 			return x;
 		}
 
@@ -88,16 +92,20 @@ namespace ft {
 			const_node_pointer x = node;
 			const_node_pointer y;
 
+			// if (x->parent != NULL && x->parent->parent == x)
+      		// 	x = x->right;
 			if (x->left != NULL)
 				return max(x->left);
-			y = x->parent;
-			// while (y != NULL && x == y->left){
-			while (x == y->left){
+			else {
+				y = x->parent;
+				// while (y != NULL && x == y->left){
+				while (x == y->left){
+					x = y;
+					y = y->parent;
+				}
 				x = y;
-				y = y->parent;
+				// return y;
 			}
-			x = y;
-			// return y;
 			return x;
 		}
 

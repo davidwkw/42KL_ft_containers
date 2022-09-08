@@ -142,7 +142,6 @@ namespace ft {
 			}
 
 			void _erase(node_pointer node){
-				node = (node == _header ? _header->parent : node);
 				node_pointer y;
 				
 				if (node->left == NULL){
@@ -150,6 +149,9 @@ namespace ft {
 						_header->left = node_type::successor(node);
 						if (_header->left == _header)
 							_header->right = _header;
+					}
+					else if (node == _header->right){
+						_header->right = node_type::predecessor(node);
 					}
 					this->_transplant(node, node->right);
 				}

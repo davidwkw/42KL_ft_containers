@@ -60,7 +60,7 @@ namespace ft {
 			map (InputIterator first, InputIterator last,
 				const key_compare& comp = key_compare(),
 				const allocator_type& alloc = allocator_type()) : _base(value_compare(comp), alloc){
-					_base.insert(first, last);
+					this->insert(first, last);
 			}
 
 			map (const map& ref) : _base(value_compare(ref._base.get_compare()), ref._base.get_allocator()){
