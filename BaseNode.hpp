@@ -2,6 +2,7 @@
 
 #define BASE_NODE_HPP
 #include "utils.hpp"
+#include <iostream>
 
 namespace ft {
 
@@ -70,10 +71,10 @@ namespace ft {
 		static node_pointer predecessor(node_pointer node){
 			node_pointer x = node;
 			node_pointer y;
-			
-			// if (x->parent != NULL && x->parent->parent == x)
-      		// 	x = x->right;
-			if (x->left != NULL)
+
+			if (x->parent->parent == x && max(node) != node)
+      			x = x->right;
+			else if (x->left != NULL)
 				return max(x->left);
 			else {
 				y = x->parent;
@@ -92,9 +93,9 @@ namespace ft {
 			const_node_pointer x = node;
 			const_node_pointer y;
 
-			// if (x->parent != NULL && x->parent->parent == x)
-      		// 	x = x->right;
-			if (x->left != NULL)
+			if (x->parent->parent == x && max(node) != node)
+      			x = x->right;
+			else if (x->left != NULL)
 				return max(x->left);
 			else {
 				y = x->parent;

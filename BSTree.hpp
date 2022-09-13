@@ -289,7 +289,7 @@ namespace ft {
 			node_pointer get_root() const{ return _header->parent; }
 			size_type get_node_count() const{ return _node_count; }
 			allocator_type get_allocator() const{ return _allocator; }
-			key_compare		get_compare() const{ return _compare; }
+			key_compare	get_compare() const{ return _compare; }
 			node_allocator_type get_node_allocator() const{ return _node_allocator; }
 
 			// Iterators
@@ -305,7 +305,7 @@ namespace ft {
 			// Size
 			size_type empty() const { return _node_count == 0; }
 			size_type size() const { return _node_count; }
-			size_type max_size() const { return std::numeric_limits<size_type>::max(); }
+			size_type max_size() const { return (std::numeric_limits<size_type>::max()); }
 
 			// Element Access
 			reference operator[] (reference val) {

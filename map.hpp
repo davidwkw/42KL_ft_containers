@@ -9,7 +9,6 @@
 # include "BSTree.hpp"
 # include "reverse_iterator.hpp"
 # include "utils.hpp"
-# include <iostream>
 
 namespace ft {
 
@@ -69,13 +68,13 @@ namespace ft {
 
 			map &operator=(const map& ref){
 				if (this != &ref){
-					_base.clear();	
-					_base.insert(ref.begin(), ref.end());
+					this->clear();	
+					this->insert(ref.begin(), ref.end());
 				}
 				return *this;
 			}
 
-			~map(){ _base.clear(); }
+			~map(){ this->clear(); }
 
 			// Iterators
 			iterator begin(){ return _base.begin(); }
@@ -94,12 +93,7 @@ namespace ft {
 
 			// Element access
 			mapped_type& operator[] (const key_type& k){
-				ft::pair<iterator, bool> p =
-				this->insert(ft::make_pair(k, mapped_type()));
-				iterator it = p.first;
-				value_type & val = *it;
-				return (mapped_type&)val.second;
-				// return (*((this->insert(ft::make_pair(k,mapped_type()))).first)).second;
+				return (*((this->insert(ft::make_pair(k,mapped_type()))).first)).second;
 			}
 
 			// Modifiers 
