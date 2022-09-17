@@ -30,6 +30,11 @@ $(TEST_VECTOR): ./tests/$(TEST_VECTOR).cpp
 	@$(RM) ft_output std_output;
 	@$(RM) $(TEST_VECTOR);
 
+$(TEST_VECTOR_PERFORMANCE): ./tests/$(TEST_VECTOR_PERFORMANCE).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_VECTOR_PERFORMANCE) ./tests/$(TEST_VECTOR_PERFORMANCE).cpp -I.
+	@./$(TEST_VECTOR_PERFORMANCE)
+	@$(RM) $(TEST_VECTOR_PERFORMANCE);
+
 $(TEST_MAP): ./tests/$(TEST_MAP).cpp
 	@$(CXX) $(CXXFLAGS) -o $(TEST_MAP) ./tests/$(TEST_MAP).cpp -I.
 	@./$(TEST_MAP) > ft_output;
@@ -39,6 +44,11 @@ $(TEST_MAP): ./tests/$(TEST_MAP).cpp
 	@$(RM) ft_output std_output;
 	@$(RM) $(TEST_MAP);
 
+$(TEST_MAP_PERFORMANCE): ./tests/$(TEST_MAP_PERFORMANCE).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_MAP_PERFORMANCE) ./tests/$(TEST_MAP_PERFORMANCE).cpp -I.
+	@./$(TEST_MAP_PERFORMANCE)
+	@$(RM) $(TEST_MAP_PERFORMANCE);
+
 $(TEST_STACK): ./tests/$(TEST_STACK).cpp
 	@$(CXX) $(CXXFLAGS) -o $(TEST_STACK) ./tests/$(TEST_STACK).cpp -I.
 	@./$(TEST_STACK) > ft_output;
@@ -47,6 +57,11 @@ $(TEST_STACK): ./tests/$(TEST_STACK).cpp
 	@diff ft_output std_output -s
 	@$(RM) ft_output std_output;
 	@$(RM) $(TEST_STACK);
+
+$(TEST_STACK_PERFORMANCE): ./tests/$(TEST_STACK_PERFORMANCE).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_STACK_PERFORMANCE) ./tests/$(TEST_STACK_PERFORMANCE).cpp -I.
+	@./$(TEST_STACK_PERFORMANCE)
+	@$(RM) $(TEST_STACK_PERFORMANCE);
 
 clean :
 	@rm -rf $(OBJS)

@@ -3,9 +3,10 @@
 #include <cstdlib>
 #include "vector.hpp"
 #include <vector>
+#include <bits/stdc++.h>
 
-#define NUMBERS 1000
-#define RUNS 42
+#define NUMBERS 1000000
+#define RUNS 10
 
 double compare_performance(){
 	std::srand(time(NULL));
@@ -14,24 +15,24 @@ double compare_performance(){
 	std::vector<int> std_vct;
 	ft::vector<int> ft_vct;
 
-	time_t start, end;
+	clock_t start, end;
 	double std_time, ft_time, perf_ratio;
 
 	std::srand(seed);
-	time(&start);
+	start = clock();
 	for (int i = 0; i < NUMBERS; ++i){
 		std_vct.push_back(rand());
 	}
-	time(&end);
-	std_time = double(end - start);
+	end = clock();
+	std_time = double(end - start) / CLOCKS_PER_SEC;
 	
 	std::srand(seed);
-	time(&start);
+	start = clock();
 	for (int i = 0; i < NUMBERS; ++i){
 		ft_vct.push_back(rand());
 	}
-	time(&end);
-	ft_time = double(end - start);
+	end = clock();
+	ft_time = double(end - start) / CLOCKS_PER_SEC;
 	perf_ratio = ft_time / std_time;
 	std::cout << "Performance ratio: " << perf_ratio << std::endl;
 	return perf_ratio;
