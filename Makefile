@@ -8,22 +8,45 @@ OBJS = $(SRCS:.cpp=.o)
 
 NAME = ft_containers
 
+TEST_VECTOR	= test_vector
+TEST_VECTOR_PERFORMANCE	= test_vector_perf
+TEST_MAP = test_map
+TEST_MAP_PERFORMANCE = test_map_perf
+TEST_STACK = test_stack
+TEST_STACK_PERFORMANCE	= test_stack_perf
+
 all : $(NAME);
 
 $(NAME) : $(OBJS)
 	@echo "Creating $(NAME)"
 	@$(CXX) $(CXXFLAGS) -o $@ $^
 
-TEST_VECTOR	=	test_vector
-
-$(TEST_VECTOR): ./test/$(TEST_VECTOR).cpp
-	@$(CXX) $(CXXFLAGS) -o $(TEST_VECTOR) ./test/$(TEST_VECTOR).cpp -I.
+$(TEST_VECTOR): ./tests/$(TEST_VECTOR).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_VECTOR) ./tests/$(TEST_VECTOR).cpp -I.
 	@./$(TEST_VECTOR) > ft_output;
-	@$(CXX) $(CXXFLAGS) -o $(TEST_VECTOR) -D USE_STD ./test/$(TEST_VECTOR).cpp -I.
+	@$(CXX) $(CXXFLAGS) -o $(TEST_VECTOR) -D USE_STD ./tests/$(TEST_VECTOR).cpp -I.
 	@./$(TEST_VECTOR) > std_output;
-	@diff ft_output std_output --report-identical-files;
+	@diff ft_output std_output -s
 	@$(RM) ft_output std_output;
 	@$(RM) $(TEST_VECTOR);
+
+$(TEST_MAP): ./tests/$(TEST_MAP).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_MAP) ./tests/$(TEST_MAP).cpp -I.
+	@./$(TEST_MAP) > ft_output;
+	@$(CXX) $(CXXFLAGS) -o $(TEST_MAP) -D USE_STD ./tests/$(TEST_MAP).cpp -I.
+	@./$(TEST_MAP) > std_output;
+	@diff ft_output std_output -s
+	@$(RM) ft_output std_output;
+	@$(RM) $(TEST_MAP);
+
+$(TEST_STACK): ./tests/$(TEST_STACK).cpp
+	@$(CXX) $(CXXFLAGS) -o $(TEST_STACK) ./tests/$(TEST_STACK).cpp -I.
+	@./$(TEST_STACK) > ft_output;
+	@$(CXX) $(CXXFLAGS) -o $(TEST_STACK) -D USE_STD ./tests/$(TEST_STACK).cpp -I.
+	@./$(TEST_STACK) > std_output;
+	@diff ft_output std_output -s
+	@$(RM) ft_output std_output;
+	@$(RM) $(TEST_STACK);
 
 clean :
 	@rm -rf $(OBJS)
