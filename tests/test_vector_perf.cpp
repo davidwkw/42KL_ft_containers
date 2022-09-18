@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include "vector.hpp"
 #include <vector>
-#include <bits/stdc++.h>
 
 #define NUMBERS 1000000
 #define RUNS 10
