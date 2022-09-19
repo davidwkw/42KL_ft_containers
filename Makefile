@@ -1,6 +1,6 @@
 CXX = c++
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -fsanitize=address -O3
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -fsanitize=address -Ofast
 
 SRCS = main.cpp
 
