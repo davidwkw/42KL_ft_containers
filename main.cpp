@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 0 //CREATE A REAL STL EXAMPLE
+#if 1 //CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
 	#include <vector>
@@ -14,8 +14,7 @@
 
 #include <stdlib.h>
 
-// #define MAX_RAM 4294967296
-#define MAX_RAM 42949672
+#define MAX_RAM 4294967296
 #define BUFFER_SIZE 4096
 struct Buffer
 {
@@ -105,7 +104,6 @@ int main(int argc, char** argv) {
 	{
 		ft::map<int, int> copy = map_int;
 	}
-
 	MutantStack<char> iterable_stack;
 	for (char letter = 'a'; letter <= 'z'; letter++)
 		iterable_stack.push(letter);
