@@ -58,6 +58,22 @@ namespace ft {
 				_node_allocator.destroy(ptr);
 			}
 
+			node_pointer _clone_tree(node_pointer node){
+				node_pointer temp;
+				
+				if (node == NULL)
+					return (NULL);
+				temp = allocate_node();
+				construct_node(temp, node->key);
+				temp->left = _clone_tree(node->left);
+				if (temp->left != NULL)
+					temp->left->parent = temp;
+				temp->right = _clone_tree(node->right);
+				if (temp->right != NULL)
+					temp->right->parent = temp;
+				return temp;
+			}
+
 			node_pointer _find(node_pointer node, const value_type& key){ 
 				node_pointer temp = (node == _header ? node->parent : node);
 				
@@ -274,7 +290,9 @@ namespace ft {
 			BSTree &operator=(const BSTree &ref){
 				if (*this != ref){
 					this->clear();	
-					this->insert(ref.begin(), ref.end());
+					_header->parent = _clone_tree(ref._header->parent);
+					_header->left = node_type::min(_header->parent);
+					_header->right = node_type::max(_header->parent);
 				}
 				return *this;
 			}
@@ -305,7 +323,7 @@ namespace ft {
 			// Size
 			size_type empty() const { return _node_count == 0; }
 			size_type size() const { return _node_count; }
-			size_type max_size() const { return (std::numeric_limits<size_type>::max()); }
+			size_type max_size() const { return _node_allocator.max_size(); }
 
 			// Element Access
 			reference operator[] (reference val) {

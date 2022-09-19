@@ -34,8 +34,8 @@ namespace ft {
 					value_compare(Compare comparator) : comp(comparator) {}
 
 				public:
-					bool operator()(const value_type& __x, const value_type& __y) const
-					{ return comp(__x.first, __y.first); }
+					bool operator()(const value_type& x, const value_type& y) const
+					{ return comp(x.first, y.first); }
      		};
 
 			typedef	typename BSTree<value_type, value_compare, Alloc>::reference reference;

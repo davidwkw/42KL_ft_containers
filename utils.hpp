@@ -34,6 +34,17 @@ namespace ft {
 	template<> struct is_integral_base<unsigned short> : true_type {};
 	template<> struct is_integral_base<long> : true_type {};
 	template<> struct is_integral_base<unsigned long> : true_type {};
+
+	template<> struct is_integral_base<const bool> : true_type {};
+	template<> struct is_integral_base<const char> : true_type {};
+	template<> struct is_integral_base<const signed char> : true_type {};
+	template<> struct is_integral_base<const unsigned char> : true_type {};
+	template<> struct is_integral_base<const int> : true_type {};
+	template<> struct is_integral_base<const unsigned int> : true_type {};
+	template<> struct is_integral_base<const short> : true_type {};
+	template<> struct is_integral_base<const unsigned short> : true_type {};
+	template<> struct is_integral_base<const long> : true_type {};
+	template<> struct is_integral_base<const unsigned long> : true_type {};
 	// Not c++98
 	// template<> struct is_integral_base<long long> : true_type {};
 	// template<> struct is_integral_base<unsigned long long> : true_type {};

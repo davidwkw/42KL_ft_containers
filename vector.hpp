@@ -48,7 +48,7 @@ namespace ft {
 								const allocator_type& alloc = allocator_type())
 			: _allocator(alloc), _arr(_allocator.allocate(n)), _size(), _capacity(n){
 				for (size_type i = 0; i < n; i++)
-					push_back(val);
+					this->push_back(val);
 			}
 
 			// range
@@ -66,8 +66,9 @@ namespace ft {
 
 			// copy
 			vector(const vector &ref) : _allocator(ref._allocator), _arr(_allocator.allocate(ref._capacity)), _size(), _capacity(ref._capacity) {
-				for (size_type i = 0; i < ref._size; i++)
-					this->push_back(ref[i]);
+				// for (size_type i = 0; i < ref._size; i++)
+				// 	this->push_back(ref[i]);
+				*this = ref;
 			}
 
 			// destructor
@@ -203,8 +204,10 @@ namespace ft {
 			}
 
 			iterator insert (iterator position, const value_type& val){
+				size_type index = std::distance(this->begin(), position);
+
 				this->insert(position, 1, val);
-				return position;
+				return iterator(_arr + index);
 			}
 
     		void insert (iterator position, size_type n, const value_type& val){
